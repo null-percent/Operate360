@@ -14,12 +14,131 @@ datasource db {
 }
 
 // For the starter
+// Users Table
 model User {
-  id       Int      @id @default(autoincrement())
-  username String
-  email    String   @unique
-  password String
-  role     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId      Int       @id @default(autoincrement())
+  username    String
+  email       String    @unique
+  password    String
+  role        String    // Assuming 'role' can be Admin, Manager, or Employee
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  // Define relationships
+  employees   Employee[] // One-to-many relationship with Employee
+}
+
+// Employees Table
+model Employee {
+  employeeId   Int       @id @default(autoincrement())
+  userId       Int       // Foreign Key referencing Users table
+  // Other employee details
+  name         String
+  position     String
+  department   String
+  // Define relationships
+  user         User      @relation(fields: [userId], references: [userId])
+  attendance   Attendance[]
+  expenses     Expense[]
+  projects     Project[] @relation("ProjectManager")
+  tasks        Task[]
+  salesLeads   SalesLead[]
+  documents    Document[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// Attendance Table
+model Attendance {
+  attendanceId  Int       @id @default(autoincrement())
+  employeeId    Int       // Foreign Key referencing Employees table
+  date          DateTime
+  status        String    // Assuming 'status' can be Present, Absent, or Late
+  // Define relationships
+  employee      Employee  @relation(fields: [employeeId], references: [employeeId])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Expenses Table
+model Expense {
+  expenseId     Int       @id @default(autoincrement())
+  employeeId    Int       // Foreign Key referencing Employees table
+  amount        Float
+  category      String
+  date          DateTime
+  description   String
+  // Define relationships
+  employee      Employee  @relation(fields: [employeeId], references: [employeeId])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Projects Table
+model Project {
+  projectId     Int       @id @default(autoincrement())
+  projectName   String
+  description   String
+  managerId     Int       // Foreign Key referencing Employees table
+  startDate     DateTime
+  endDate       DateTime
+  // Define relationships
+  manager       Employee  @relation("ProjectManager", fields: [managerId], references: [employeeId])
+  tasks         Task[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Tasks Table
+model Task {
+  taskId        Int       @id @default(autoincrement())
+  projectId     Int       // Foreign Key referencing Projects table
+  employeeId    Int       // Foreign Key referencing Employees table
+  title         String
+  description   String
+  status        String    // Assuming 'status' can be To-Do, In Progress, or Done
+  dueDate       DateTime
+  // Define relationships
+  project       Project   @relation(fields: [projectId], references: [projectId])
+  employee      Employee  @relation(fields: [employeeId], references: [employeeId])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Customers Table
+model Customer {
+  customerId    Int       @id @default(autoincrement())
+  name          String
+  email         String
+  phone         String
+  company       String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  // Define relationships
+  salesLeads    SalesLead[]
+}
+
+// SalesLeads Table
+model SalesLead {
+  leadId        Int       @id @default(autoincrement())
+  customerId    Int       // Foreign Key referencing Customers table
+  employeeId    Int       // Foreign Key referencing Employees table
+  status        String    // Assuming 'status' can be Contacted, Interested, or Closed
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  // Define relationships
+  customer      Customer  @relation(fields: [customerId], references: [customerId])
+  employee      Employee  @relation(fields: [employeeId], references: [employeeId])
+}
+
+// Documents Table
+model Document {
+  documentId    Int       @id @default(autoincrement())
+  employeeId    Int       // Foreign Key referencing Employees table
+  title         String
+  description   String
+  fileUrl       String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  // Define relationships
+  employee      Employee  @relation(fields: [employeeId], references: [employeeId])
 }
