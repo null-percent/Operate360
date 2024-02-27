@@ -1,6 +1,6 @@
-# Node.js Express Backend Starter
+# Operate360
 
-This project serves as a starter template for backend development using Node.js, Express.js, Prisma, Swagger, ESLint, and PostgreSQL. It provides a solid foundation for building scalable and maintainable web applications.
+Comprehensive ERP system for medium to large-sized enterprises. This system will integrate various business processes and functionalities to streamline operations, enhance efficiency, and provide insightful data analytics for decision-making.
 
 ## Created by: Kukuh Tri Winarno Nugroho & Verdy Bangkit Yudho Negoro
 
