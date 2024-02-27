@@ -23,7 +23,7 @@ const options = {
       // Add more servers for different environments if needed
     ]
   },
-  apis: ['./src/**/*.js'] // Path to your API routes
+  apis: ['./src/**/*.js', './src/auth/*.js'] // Path to your API routes
 }
 
 const specs = swaggerJsdoc(options)

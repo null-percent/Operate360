@@ -1,49 +1,107 @@
-// src/controllers/loginController.js
-const { validationResult } = require('express-validator')
+// src/auth/authController.js
+const { PrismaClient } = require('@prisma/client')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { User } = require('../generated/prisma-client') // Assuming you have a User model from Prisma
 
-const authController = async (req, res) => {
+const prisma = new PrismaClient()
+
+// Maintain a list of revoked tokens
+const revokedTokens = new Set()
+
+const generateToken = (userId, username, roleId) => {
+  const secretKey = 'operate360-secret' // Replace with your secret key
+  return jwt.sign({ userId, username, roleId }, secretKey, { expiresIn: '1h' })
+}
+
+const login = async (req, res) => {
+  const { email, password } = req.body
+
   try {
-    // Validate request body
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: 'Email and password are required' })
     }
 
-    // Authenticate user
-    const { username, password } = req.body
-
-    // Check if the user exists
-    const user = await User.findOne({
-      where: { username }
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { role: true }
     })
 
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' })
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      return res.status(401).json({ message: 'Invalid email or password' })
     }
 
-    // Compare hashed password
-    const isPasswordMatch = await bcrypt.compare(password, user.password)
-    if (!isPasswordMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' })
-    }
+    const token = generateToken(user.userId, user.username, user.roleId)
 
-    // Generate JWT token
-    const accessToken = jwt.sign(
-      { userId: user.id, username: user.username },
-      'your-secret-key',
-      {
-        expiresIn: '1h' // Token expires in 1 hour (adjust as needed)
-      }
-    )
-
-    res.json({ accessToken })
+    res.json({ message: 'login successfully', token })
   } catch (error) {
-    console.error('Error in loginController:', error)
-    res.status(500).json({ error: 'Internal Server Error' })
+    console.error('Login Error:', error)
+    res.status(500).json({ message: 'Internal Server Error' })
   }
 }
 
-module.exports = authController
+const logout = async (req, res) => {
+  try {
+    // Extract token from the authorization header
+    const token = req.headers.authorization?.split(' ')[1]
+
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' })
+    }
+
+    // Add the token to the revoked tokens list
+    revokedTokens.add(token)
+
+    res.json({ message: 'Logout successful' })
+  } catch (error) {
+    console.error('Logout Error:', error)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+const register = async (req, res) => {
+  const { username, email, password, roleId } = req.body
+
+  try {
+    if (!username || !email || !password || !roleId) {
+      return res.status(400).json({ message: 'All fields are required' })
+    }
+
+    // Check if email is already registered
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email is already registered' })
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create a new user
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+        roleId
+      },
+      include: { role: true }
+    })
+
+    const token = generateToken(
+      newUser.userId,
+      newUser.username,
+      newUser.roleId
+    )
+
+    res.status(201).json({ message: 'Register a user successfully', token })
+  } catch (error) {
+    console.error('Registration Error:', error)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+module.exports = { login, logout, register }
