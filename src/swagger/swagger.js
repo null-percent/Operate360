@@ -6,10 +6,10 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Operate360 API (Example)',
+      title: 'Operate360 API',
       version: '1.0.0',
       description:
-        'API documentation for Operate360 - Your Comprehensive ERP System (Example)',
+        'API documentation for Operate360 - Your Comprehensive ERP System',
       contact: {
         name: 'Your Name',
         email: 'your.email@example.com'
@@ -23,7 +23,7 @@ const options = {
       // Add more servers for different environments if needed
     ]
   },
-  apis: ['./src/**/*.js', './src/auth/*.js'] // Path to your API routes
+  apis: ['./src/**/*.js'] // Path to your API routes
 }
 
 const specs = swaggerJsdoc(options)

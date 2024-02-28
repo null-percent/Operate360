@@ -7,9 +7,17 @@ const router = express.Router()
 
 /**
  * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication Process management
+ */
+
+/**
+ * @swagger
  * /api/auth/login:
  *   post:
  *     summary: User login
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
@@ -40,6 +48,7 @@ router.post('/login', login)
  * /api/auth/logout:
  *   post:
  *     summary: User logout
+ *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -59,6 +68,7 @@ router.post('/logout', authenticateToken, logout)
  * /api/auth/register:
  *   post:
  *     summary: User registration
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
