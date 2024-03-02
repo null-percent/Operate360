@@ -15,19 +15,6 @@ datasource db {
 
 // For the starter
 // Users Table
-model User {
-  userId      Int       @id @default(autoincrement())
-  username    String
-  email       String    @unique
-  password    String
-  roleId      Int       // Foreign Key referencing Role table
-  role        Role      @relation(fields: [roleId], references: [roleId])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  // Define relationships
-  employees   Employee[] // One-to-many relationship with Employee
-}
-
 // Role Table
 model Role {
   roleId      Int       @id @default(autoincrement())
@@ -37,7 +24,45 @@ model Role {
   updatedAt   DateTime  @updatedAt
 }
 
-// Employees Table
+// User Table
+model User {
+  userId      Int       @id @default(autoincrement())
+  username    String
+  email       String    @unique
+  password    String
+  roleId      Int       // Foreign Key referencing Role table
+  role        Role      @relation(fields: [roleId], references: [roleId])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  employees   Employee[] // One-to-many relationship with Employee
+}
+
+// Projects Table
+model Project {
+  projectId     Int       @id @default(autoincrement())
+  projectName   String
+  description   String
+  managerId     Int       // Foreign Key referencing Employees table
+  startDate     DateTime
+  endDate       DateTime
+  // Define relationships
+  manager       Employee  @relation("ProjectManager", fields: [managerId], references: [employeeId])
+  tasks         Task[]
+  projectEmployees ProjectEmployee[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Project-Employee Many-to-Many Relationship
+model ProjectEmployee {
+  projectId   Int
+  employeeId  Int
+  project     Project @relation(fields: [projectId], references: [projectId])
+  employee    Employee @relation(fields: [employeeId], references: [employeeId])
+  @@id([projectId, employeeId])
+}
+
+// Employee Table
 model Employee {
   employeeId   Int       @id @default(autoincrement())
   userId       Int       // Foreign Key referencing Users table
@@ -53,6 +78,7 @@ model Employee {
   tasks        Task[]
   salesLeads   SalesLead[]
   documents    Document[]
+  projectEmployees ProjectEmployee[] // Add this line for the opposite relation
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -79,21 +105,6 @@ model Expense {
   description   String
   // Define relationships
   employee      Employee  @relation(fields: [employeeId], references: [employeeId])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-// Projects Table
-model Project {
-  projectId     Int       @id @default(autoincrement())
-  projectName   String
-  description   String
-  managerId     Int       // Foreign Key referencing Employees table
-  startDate     DateTime
-  endDate       DateTime
-  // Define relationships
-  manager       Employee  @relation("ProjectManager", fields: [managerId], references: [employeeId])
-  tasks         Task[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
