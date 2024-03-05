@@ -1,39 +1,33 @@
 // src/routes/documentRoutes.js
 const express = require('express')
-const { uploadDocument, upload } = require('../controllers/documentController')
-const { documentValidation } = require('../middlewares/documentMiddleware')
+const { uploadDocument } = require('../controllers/documentController')
+const { upload } = require('../middlewares/documentMiddleware')
 
 const router = express.Router()
 
+// ... (previous routes)
+
 /**
  * @swagger
- * /api/documents/upload:
+ * /api/documents/create:
  *   post:
  *     summary: Upload a document
  *     tags: [Documents]
- *     consumes:
- *       - multipart/form-data
- *     parameters:
- *       - in: formData
- *         name: employeeId
- *         type: integer
- *         required: true
- *         description: Employee ID associated with the document
- *       - in: formData
- *         name: title
- *         type: string
- *         required: true
- *         description: Title of the document
- *       - in: formData
- *         name: description
- *         type: string
- *         required: true
- *         description: Description of the document
- *       - in: formData
- *         name: file
- *         type: file
- *         required: true
- *         description: The document file to upload
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               employeeId:
+ *                 type: integer
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               file:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Document uploaded successfully
@@ -43,25 +37,18 @@ const router = express.Router()
  *               message: "Document uploaded successfully"
  *               document: {
  *                 documentId: 1,
+ *                 employeeId: 1,
  *                 title: 'Document Title',
  *                 description: 'Document Description',
- *                 fileUrl: '/uploads/documents/1234567890-document.pdf',
+ *                 fileUrl: '/uploads/1646888958395_document.pdf',
  *                 createdAt: "2022-01-01T00:00:00.000Z",
- *                 updatedAt: "2022-01-01T12:34:56.789Z",
- *                 employeeId: 1
+ *                 updatedAt: "2022-01-01T12:34:56.789Z"
  *               }
  *       400:
- *         description: No document uploaded or validation error
- *       404:
- *         description: Employee not found
+ *         description: File size exceeds the limit of 5MB
  *       500:
  *         description: Internal Server Error
  */
-router.post(
-  '/upload',
-  documentValidation,
-  upload.single('file'),
-  uploadDocument
-)
+router.post('/create', upload.single('file'), uploadDocument)
 
 module.exports = router

@@ -1,12 +1,14 @@
 // src/middlewares/documentMiddleware.js
-const { body } = require('express-validator')
+const multer = require('multer')
 
-const documentValidation = [
-  body('employeeId').isInt().withMessage('Employee ID must be an integer'),
-  body('title').notEmpty().withMessage('Title cannot be empty'),
-  body('description').notEmpty().withMessage('Description cannot be empty')
-]
+// Set up multer for file upload
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+})
 
 module.exports = {
-  documentValidation
+  upload
 }
