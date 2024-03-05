@@ -10,6 +10,7 @@ const expenseRoutes = require('./routes/expense')
 const customerRoutes = require('./routes/customer')
 const salesLeadRoutes = require('./routes/saleslead')
 const employeeRoutes = require('./routes/employee')
+const documentRoutes = require('./routes/document')
 
 app.use(bodyParser.json())
 
@@ -21,6 +22,7 @@ app.use('/api/expenses', expenseRoutes)
 app.use('/api/customers', customerRoutes)
 app.use('/api/salesleads', salesLeadRoutes)
 app.use('/api/employees', employeeRoutes)
+app.use('/api/documents', documentRoutes)
 
 app.get('/', (req, res) => {
   res.send('Hello, Operate360!')

@@ -20,9 +20,10 @@ const uploadDocument = async (req, res) => {
     // Generate a unique filename
     const uniqueFilename = `${Date.now()}_${file.originalname}`
 
-    // Create a path to store the file
+    // Create a path to store the file in the public/uploads directory
     const filePath = path.join(
       __dirname,
+      '..',
       '..',
       'public',
       'uploads',
@@ -49,7 +50,95 @@ const uploadDocument = async (req, res) => {
   }
 }
 
+/**
+ * Delete a document by ID
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const deleteDocument = async (req, res) => {
+  try {
+    const { documentId } = req.params
+
+    // Retrieve document data from the database
+    const document = await prisma.document.findUnique({
+      where: {
+        documentId: parseInt(documentId)
+      }
+    })
+
+    // Check if the document exists
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found' })
+    }
+
+    // Delete the file from the server
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '..',
+      'public',
+      document.fileUrl
+    )
+    fs.unlinkSync(filePath)
+
+    // Delete the document from the database
+    await prisma.document.delete({
+      where: {
+        documentId: parseInt(documentId)
+      }
+    })
+
+    res.json({ message: 'Document deleted successfully' })
+  } catch (error) {
+    console.error('Delete Document Error:', error)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+/**
+ * Get all documents
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const getAllDocuments = async (req, res) => {
+  try {
+    // Retrieve all documents from the database
+    const documents = await prisma.document.findMany()
+
+    res.json(documents)
+  } catch (error) {
+    console.error('Get All Documents Error:', error)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+/**
+ * Get all documents related to a specific employee by ID
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const getDocumentsByEmployee = async (req, res) => {
+  try {
+    const { employeeId } = req.params
+
+    // Retrieve documents related to the employee from the database
+    const documents = await prisma.document.findMany({
+      where: {
+        employeeId: parseInt(employeeId)
+      }
+    })
+
+    res.json(documents)
+  } catch (error) {
+    console.error('Get Documents By Employee Error:', error)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
 module.exports = {
   // ... (previous exports)
-  uploadDocument
+  uploadDocument,
+  deleteDocument,
+  getAllDocuments,
+  getDocumentsByEmployee
 }
